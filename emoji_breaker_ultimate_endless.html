@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Breaker - Peiwen 終極無盡極速版</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      touch-action: manipulation;
+      transition: background-color 0.8s ease, color 0.8s ease;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* 日夜切換流暢過渡類別 */
+    .theme-transition {
+      transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
+    }
+  </style>
+</head>
+<body id="bodyEl" class="min-h-screen bg-[#FFFDF9] text-[#29272A] flex flex-col items-center justify-center p-4 selection:bg-[#F5C9D6] selection:text-[#29272A]">
+
+  <div class="w-full max-w-md flex flex-col items-center">
+    
+    <!-- Header Bar -->
+    <header class="w-full flex justify-between items-center mb-4 px-2">
+      <div class="flex items-center gap-2">
+        <i id="headerIcon" class="fa-solid fa-wand-magic-sparkles text-[#F5C9D6] text-xl animate-spin" style="animation-duration: 6s;"></i>
+        <h1 id="headerTitle" class="font-bold text-xl tracking-tight">Emoji Breaker</h1>
+        <span id="headerBadge" class="text-[10px] bg-[#F5C9D6] text-[#29272A] px-2 py-0.5 rounded-full font-extrabold uppercase">日夜無盡版</span>
+      </div>
+      <button id="soundToggleBtn" class="p-2.5 rounded-full hover:bg-black/10 transition-colors text-[#8C858A]">
+        <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+      </button>
+    </header>
+
+    <!-- Main Card Container -->
+    <div id="mainCard" class="w-full bg-white border border-[#EEE8E6] rounded-3xl p-6 shadow-sm flex flex-col items-center relative overflow-hidden theme-transition">
+      
+      <!-- READY SCREEN -->
+      <div id="readyScreen" class="w-full flex flex-col items-center text-center py-2 space-y-4">
+        <div class="space-y-1">
+          <span class="text-xs font-semibold uppercase tracking-widest text-[#8C858A]">Day/Night & Dynamic Speed Boost</span>
+          <h2 class="text-2xl font-bold">Choose your star ✦</h2>
+        </div>
+
+        <!-- Selected Emoji Preview Box -->
+        <div id="emojiPreview" class="w-20 h-20 bg-[#FFFDF9] border border-[#EEE8E6] rounded-2xl flex items-center justify-center text-4xl shadow-inner select-none transition-transform active:scale-95 theme-transition">
+          🩷
+        </div>
+
+        <!-- Custom Input -->
+        <div class="w-full space-y-1 text-left">
+          <label class="text-xs text-[#8C858A] block font-medium px-1">Type or Paste Emoji</label>
+          <input
+            id="emojiInput"
+            type="text"
+            value="🩷🧡💛🩵💜"
+            placeholder="Type emoji here..."
+            class="w-full px-4 py-2.5 text-center text-lg bg-[#FFFDF9] border border-[#EEE8E6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F5C9D6] transition-all theme-transition"
+          />
+        </div>
+
+        <!-- Preset Selector Panel -->
+        <div class="w-full space-y-1 text-left">
+          <label class="text-xs text-[#8C858A] block font-medium px-1">Quick Pick</label>
+          <div id="presetContainer" class="flex flex-wrap justify-center gap-1.5">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <button
+          id="startBtn"
+          class="w-full py-3.5 bg-[#242226] text-white font-semibold rounded-2xl hover:bg-[#3a373d] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-1"
+        >
+          <i class="fa-solid fa-play text-sm"></i>
+          START ULTIMATE GAME
+        </button>
+
+        <!-- Best Score Footer -->
+        <div class="flex items-center gap-1.5 text-xs text-[#8C858A] pt-1">
+          <i class="fa-solid fa-trophy text-[#F7E9A8]"></i>
+          <span>BEST RECORD: <strong id="bestScoreReady">0</strong></span>
+        </div>
+      </div>
+
+      <!-- GAME PLAY SCREEN -->
+      <div id="gamePlayScreen" class="w-full hidden flex-col items-center">
+        <!-- Score & Mode HUD -->
+        <div class="w-full flex justify-between items-center mb-2 px-1 text-sm font-semibold">
+          <div class="flex items-center gap-2">
+            <span id="modeBadge" class="text-xs px-2 py-0.5 rounded-md bg-[#F7E9A8] text-[#29272A] font-bold">磚塊模式</span>
+            <div class="flex items-center gap-1 text-[#8C858A]">
+              <span>SCORE</span>
+              <span id="currentScore" class="text-[#29272A] text-base font-bold">0</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-[#8C858A]">
+            <i class="fa-solid fa-trophy text-[#F7E9A8]"></i>
+            <span>BEST</span>
+            <span id="bestScoreHUD" class="text-[#29272A] text-base font-bold">0</span>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="canvasContainer" class="relative w-full aspect-[4/5] bg-[#FFFDF9] rounded-2xl overflow-hidden border border-[#EEE8E6] theme-transition">
+          <canvas id="gameCanvas" width="480" height="600" class="w-full h-full touch-none cursor-crosshair"></canvas>
+
+          <!-- Day/Night Mode Banner Toast -->
+          <div id="nightToast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 text-yellow-300 text-xs font-black px-4 py-1.5 rounded-full border border-yellow-300/40 shadow-lg hidden items-center gap-2 animate-bounce pointer-events-none">
+            <i class="fa-solid fa-moon"></i> NIGHT MODE ACTIVATED!
+          </div>
+
+          <!-- GameOver Overlay -->
+          <div id="overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm hidden flex-col items-center justify-center p-6 text-center space-y-4 theme-transition">
+            <span id="newBestBadge" class="hidden px-3 py-1 bg-[#F7E9A8] text-[#29272A] text-xs font-bold rounded-full uppercase tracking-wider items-center gap-1">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> NEW BEST!
+            </span>
+            
+            <h2 id="overlayTitle" class="text-3xl font-extrabold text-[#29272A]">GAME OVER</h2>
+
+            <div class="space-y-1">
+              <p class="text-xs text-[#8C858A] font-semibold uppercase tracking-wider">Final Score</p>
+              <p id="finalScore" class="text-4xl font-black text-[#29272A]">0</p>
+            </div>
+
+            <div class="w-full space-y-2 pt-3">
+              <button
+                id="playAgainBtn"
+                class="w-full py-3.5 bg-[#242226] text-white font-semibold rounded-xl hover:bg-[#3a373d] transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                <i class="fa-solid fa-rotate-right"></i>
+                PLAY AGAIN
+              </button>
+              <button
+                id="changeEmojiBtn"
+                class="w-full py-3.5 bg-transparent border border-[#EEE8E6] text-[#29272A] font-semibold rounded-xl hover:bg-[#FFFDF9] transition-all flex items-center justify-center gap-2"
+              >
+                <i class="fa-solid fa-arrow-left"></i>
+                CHANGE EMOJI
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Info (Updated with Peiwen requested copy) -->
+    <footer class="mt-4 text-xs text-[#8C858A] flex items-center gap-1.5">
+      <span>Made with Peiwen</span>
+      <i class="fa-solid fa-heart text-[#F5C9D6]"></i>
+      <span>Korean Minimal & Google Dino Aesthetic</span>
+    </footer>
+
+  </div>
+
+  <script>
+    const BEST_SCORE_KEY = "emojiBreakerBestScore";
+    const CANVAS_WIDTH = 480;
+    const CANVAS_HEIGHT = 600;
+    const PASTEL_COLORS = ['#F5C9D6', '#F7D4B7', '#F7E9A8', '#CDE8F1', '#DCD0F0'];
+    const PRESET_EMOJIS = ['🩷', '🧡', '💛', '🩵', '💜', '🐱', '✨', '🌸', '🧸', '🍓', '🎀', '🐥'];
+
+    // 道具類型定義 (包含加分、減分、加速、減速、變長、變短)
+    const ITEM_TYPES = [
+      { type: 'score_plus_20', emoji: '⭐', label: '+20分!', color: '#FFE600', bg: '#FFF9C4' },
+      { type: 'score_plus_50', emoji: '💎', label: '+50分!!', color: '#00E5FF', bg: '#E0F7FA' },
+      { type: 'score_minus_30', emoji: '💣', label: '-30分!', color: '#FF3D00', bg: '#FFEBEE' },
+      { type: 'expand', emoji: '↔️', label: '板子變長!', color: '#FF6090', bg: '#FCE4EC' },
+      { type: 'shrink', emoji: '🤏', label: '板子變短!', color: '#FF9100', bg: '#FFF3E0' },
+      { type: 'speed_up', emoji: '⚡', label: '球速加速!', color: '#E040FB', bg: '#F3E5F5' },
+      { type: 'slow_down', emoji: '🐢', label: '緩衝減速', color: '#00E676', bg: '#E8F5E9' }
+    ];
+
+    let gameState = 'ready';
+    let selectedEmoji = '🩷';
+    let score = 0;
+    let bestScore = 0;
+    let isNewBest = false;
+    let soundEnabled = true;
+    let isEndlessMode = false;
+    let comboCount = 0;
+    let gameTime = 0; // 遊玩時間（秒）
+    let isNightMode = false;
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let audioCtx = null;
+    let animFrameId = null;
+    let lastTime = 0;
+
+    const INITIAL_SPEED = 380;
+    const SPEED_ACCELERATION = 5.0; 
+    const MAX_SPEED = 880;
+
+    let ball = {
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT - 60,
+      radius: 16,
+      dx: 0,
+      dy: 0,
+      speed: INITIAL_SPEED,
+      emoji: '🩷'
+    };
+
+    let paddle = {
+      x: (CANVAS_WIDTH - 110) / 2,
+      y: CANVAS_HEIGHT - 35,
+      width: 110,
+      height: 12,
+      minWidth: 50,
+      maxWidth: 220
+    };
+
+    let bricks = [];
+    let items = []; 
+    let floatingTexts = []; // 動態飄浮文字 (+20, COMBO 等)
+
+    function playSound(freq, duration = 0.08, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function loadBestScore() {
+      try {
+        const saved = localStorage.getItem(BEST_SCORE_KEY);
+        if (saved) {
+          const val = parseInt(saved, 10);
+          if (!isNaN(val) && val >= 0) {
+            bestScore = val;
+          }
+        }
+      } catch (e) {}
+      updateScoreUI();
+    }
+
+    function saveBestScore(newScore) {
+      if (newScore > bestScore) {
+        bestScore = newScore;
+        isNewBest = true;
+        try {
+          localStorage.setItem(BEST_SCORE_KEY, String(bestScore));
+        } catch (e) {}
+      }
+    }
+
+    // Google 小恐龍風格：日夜模式切換檢查
+    function checkDayNightCycle() {
+      const cycle = Math.floor(score / 50);
+      const shouldBeNight = (cycle % 2 === 1) && (score >= 50);
+
+      if (shouldBeNight !== isNightMode) {
+        isNightMode = shouldBeNight;
+        applyTheme(isNightMode);
+      }
+    }
+
+    function applyTheme(night) {
+      const body = document.getElementById('bodyEl');
+      const mainCard = document.getElementById('mainCard');
+      const canvasContainer = document.getElementById('canvasContainer');
+      const currentScore = document.getElementById('currentScore');
+      const bestScoreHUD = document.getElementById('bestScoreHUD');
+      const overlay = document.getElementById('overlay');
+      const overlayTitle = document.getElementById('overlayTitle');
+      const nightToast = document.getElementById('nightToast');
+
+      if (night) {
+        body.style.backgroundColor = '#121214';
+        body.style.color = '#F3ECE7';
+        mainCard.style.backgroundColor = '#1E1D21';
+        mainCard.style.borderColor = '#333136';
+        canvasContainer.style.backgroundColor = '#18171A';
+        canvasContainer.style.borderColor = '#333136';
+        currentScore.style.color = '#F5C9D6';
+        bestScoreHUD.style.color = '#F7E9A8';
+        overlay.style.backgroundColor = 'rgba(24, 23, 26, 0.92)';
+        overlayTitle.style.color = '#F3ECE7';
+        
+        nightToast.classList.remove('hidden');
+        nightToast.classList.add('flex');
+        playSound(220, 0.2, 'triangle');
+      } else {
+        body.style.backgroundColor = '#FFFDF9';
+        body.style.color = '#29272A';
+        mainCard.style.backgroundColor = '#FFFFFF';
+        mainCard.style.borderColor = '#EEE8E6';
+        canvasContainer.style.backgroundColor = '#FFFDF9';
+        canvasContainer.style.borderColor = '#EEE8E6';
+        currentScore.style.color = '#29272A';
+        bestScoreHUD.style.color = '#29272A';
+        overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        overlayTitle.style.color = '#29272A';
+
+        nightToast.classList.add('hidden');
+        nightToast.classList.remove('flex');
+      }
+    }
+
+    function updateScoreUI() {
+      document.getElementById('bestScoreReady').innerText = bestScore;
+      document.getElementById('bestScoreHUD').innerText = bestScore;
+      document.getElementById('currentScore').innerText = Math.max(0, score);
+      document.getElementById('finalScore').innerText = Math.max(0, score);
+      
+      const badge = document.getElementById('modeBadge');
+      if (isEndlessMode) {
+        badge.innerText = "狂暴無盡打牆 ✨";
+        badge.className = "text-xs px-2 py-0.5 rounded-md bg-[#F5C9D6] text-[#29272A] font-bold animate-pulse";
+      } else {
+        badge.innerText = "磚塊模式 🧱";
+        badge.className = "text-xs px-2 py-0.5 rounded-md bg-[#F7E9A8] text-[#29272A] font-bold";
+      }
+
+      checkDayNightCycle();
+    }
+
+    // 顯眼放大動態漂浮文字 (+20, COMBO, 道具提示等)
+    function addFloatingText(text, x, y, color = '#FFFFFF') {
+      floatingTexts.push({
+        text,
+        x,
+        y,
+        color,
+        alpha: 1.0,
+        dy: -55
+      });
+    }
+
+    function parseEmojiInput(value) {
+      const trimmed = value.trim();
+      if (!trimmed) return '🩷';
+      const array = Array.from(trimmed);
+      return array[0] || '🩷';
+    }
+
+    function initBricks() {
+      const rows = 5;
+      const cols = 6;
+      const padding = 10;
+      const marginTop = 50;
+      const marginLeft = 20;
+      const totalWidth = CANVAS_WIDTH - marginLeft * 2;
+      const brickWidth = (totalWidth - padding * (cols - 1)) / cols;
+      const brickHeight = 22;
+
+      const newBricks = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          newBricks.push({
+            x: marginLeft + c * (brickWidth + padding),
+            y: marginTop + r * (brickHeight + padding),
+            width: brickWidth,
+            height: brickHeight,
+            color: PASTEL_COLORS[r % PASTEL_COLORS.length],
+            active: true
+          });
+        }
+      }
+      return newBricks;
+    }
+
+    function startGame() {
+      isNewBest = false;
+      score = 0;
+      comboCount = 0;
+      gameTime = 0;
+      isEndlessMode = false;
+      isNightMode = false;
+      applyTheme(false);
+
+      items = [];
+      floatingTexts = [];
+      updateScoreUI();
+      bricks = initBricks();
+
+      paddle = {
+        x: (CANVAS_WIDTH - 110) / 2,
+        y: CANVAS_HEIGHT - 35,
+        width: 110,
+        height: 12,
+        minWidth: 50,
+        maxWidth: 220
+      };
+
+      const minAngle = Math.PI / 6; 
+      const maxAngle = Math.PI / 3; 
+      const randomAngle = minAngle + Math.random() * (maxAngle - minAngle);
+      const sign = Math.random() < 0.5 ? 1 : -1;
+
+      ball = {
+        x: CANVAS_WIDTH / 2,
+        y: CANVAS_HEIGHT - 60,
+        radius: 16,
+        dx: INITIAL_SPEED * Math.cos(randomAngle) * sign,
+        dy: -INITIAL_SPEED * Math.sin(randomAngle),
+        speed: INITIAL_SPEED,
+        emoji: selectedEmoji
+      };
+
+      gameState = 'playing';
+      
+      document.getElementById('readyScreen').classList.add('hidden');
+      document.getElementById('gamePlayScreen').classList.remove('hidden');
+      document.getElementById('gamePlayScreen').classList.add('flex');
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById('overlay').classList.remove('flex');
+
+      playSound(523.25, 0.1);
+
+      lastTime = performance.now();
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function handleGameOver() {
+      gameState = 'gameOver';
+      saveBestScore(score);
+      updateScoreUI();
+
+      const overlay = document.getElementById('overlay');
+      const title = document.getElementById('overlayTitle');
+      const badge = document.getElementById('newBestBadge');
+
+      title.innerText = 'GAME OVER';
+      if (isNewBest) {
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+
+      playSound(180, 0.3, 'sawtooth');
+    }
+
+    function getRandomItemConfig() {
+      const idx = Math.floor(Math.random() * ITEM_TYPES.length);
+      return ITEM_TYPES[idx];
+    }
+
+    function updatePhysics(dt) {
+      gameTime += dt;
+
+      // 球體漸進變快
+      if (ball.speed < MAX_SPEED) {
+        ball.speed += SPEED_ACCELERATION * dt;
+        const currentSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+        if (currentSpeed > 0) {
+          ball.dx = (ball.dx / currentSpeed) * ball.speed;
+          ball.dy = (ball.dy / currentSpeed) * ball.speed;
+        }
+      }
+
+      ball.x += ball.dx * dt;
+      ball.y += ball.dy * dt;
+
+      // 牆壁碰撞
+      if (ball.x - ball.radius <= 0) {
+        ball.x = ball.radius;
+        ball.dx = Math.abs(ball.dx);
+        playSound(300);
+      }
+      if (ball.x + ball.radius >= CANVAS_WIDTH) {
+        ball.x = CANVAS_WIDTH - ball.radius;
+        ball.dx = -Math.abs(ball.dx);
+        playSound(300);
+      }
+
+      // 頂部牆壁碰撞邏輯
+      if (ball.y - ball.radius <= 0) {
+        ball.y = ball.radius;
+        ball.dy = Math.abs(ball.dy);
+        
+        if (isEndlessMode) {
+          comboCount++;
+          const comboBonus = Math.floor(comboCount / 3);
+          const gainedScore = 1 + comboBonus;
+          score += gainedScore;
+          saveBestScore(score);
+          updateScoreUI();
+
+          const labelText = comboBonus > 0 ? `+${gainedScore} 🔥x${comboCount}` : `+1`;
+          addFloatingText(labelText, ball.x, ball.y + 25, isNightMode ? '#FFD700' : '#FF4081');
+
+          // 無盡模式頂牆：45% 機率掉落道具
+          if (Math.random() < 0.45) {
+            const itemConfig = getRandomItemConfig();
+            const itemBaseSpeed = 180 + gameTime * 3.5;
+            items.push({
+              x: ball.x,
+              y: ball.y + 10,
+              ...itemConfig,
+              speed: itemBaseSpeed
+            });
+          }
+
+          playSound(750 + Math.min(300, comboCount * 20), 0.05);
+        } else {
+          playSound(320);
+        }
+      }
+
+      // 防止 dy 趨近 0 平行
+      if (Math.abs(ball.dy) < 55) {
+        ball.dy = ball.dy < 0 ? -95 : 95;
+      }
+
+      // 漏球 Game Over
+      if (ball.y - ball.radius > CANVAS_HEIGHT) {
+        handleGameOver();
+        return;
+      }
+
+      // 擋板碰撞
+      if (
+        ball.y + ball.radius >= paddle.y &&
+        ball.y - ball.radius <= paddle.y + paddle.height &&
+        ball.x + ball.radius >= paddle.x &&
+        ball.x - ball.radius <= paddle.x + paddle.width &&
+        ball.dy > 0
+      ) {
+        const hitPoint = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+        const maxAngle = (6 * Math.PI) / 12; // 75 度
+        let bounceAngle = hitPoint * maxAngle;
+
+        const minVerticalFactor = 0.35;
+        let vx = ball.speed * Math.sin(bounceAngle);
+        let vy = -Math.abs(ball.speed * Math.cos(bounceAngle));
+
+        if (Math.abs(vy) < ball.speed * minVerticalFactor) {
+          vy = -ball.speed * minVerticalFactor;
+          const rem = Math.sqrt(Math.max(0, ball.speed * ball.speed - vy * vy));
+          vx = vx >= 0 ? rem : -rem;
+        }
+
+        ball.dx = vx;
+        ball.dy = vy;
+        ball.y = paddle.y - ball.radius;
+
+        playSound(440);
+      }
+
+      // 磚塊碰撞 & 道具掉落
+      if (!isEndlessMode) {
+        let allCleared = true;
+        for (let i = 0; i < bricks.length; i++) {
+          const b = bricks[i];
+          if (!b.active) continue;
+
+          allCleared = false;
+
+          const nearestX = Math.max(b.x, Math.min(ball.x, b.x + b.width));
+          const nearestY = Math.max(b.y, Math.min(ball.y, b.y + b.height));
+
+          const deltaX = ball.x - nearestX;
+          const deltaY = ball.y - nearestY;
+
+          if (deltaX * deltaX + deltaY * deltaY < ball.radius * ball.radius) {
+            b.active = false;
+            score += 10;
+            saveBestScore(score);
+            updateScoreUI();
+            addFloatingText('+10', b.x + b.width / 2, b.y, '#FFD700');
+            playSound(600 + Math.random() * 200, 0.06);
+
+            // 磚塊 50% 機率掉落道具
+            if (Math.random() < 0.50) {
+              const itemConfig = getRandomItemConfig();
+              const itemBaseSpeed = 170 + gameTime * 3.0;
+              items.push({
+                x: b.x + b.width / 2,
+                y: b.y + b.height / 2,
+                ...itemConfig,
+                speed: itemBaseSpeed
+              });
+            }
+
+            const overlapX = ball.radius - Math.abs(deltaX);
+            const overlapY = ball.radius - Math.abs(deltaY);
+
+            if (overlapX < overlapY && deltaX !== 0) {
+              ball.dx = -ball.dx;
+              ball.x += ball.dx > 0 ? overlapX : -overlapX;
+            } else if (deltaY !== 0) {
+              ball.dy = -ball.dy;
+              ball.y += deltaY > 0 ? overlapY : -overlapY;
+            }
+            break;
+          }
+        }
+
+        // 切換無盡模式
+        if (allCleared && bricks.length > 0) {
+          isEndlessMode = true;
+          updateScoreUI();
+          addFloatingText('ENDLESS MODE! ✨', CANVAS_WIDTH / 2, 120, '#FF4081');
+          playSound(880, 0.3);
+        }
+      }
+
+      // 道具移動與接取碰撞
+      for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
+        item.y += item.speed * dt;
+
+        // 擋板接到道具
+        if (
+          item.y >= paddle.y - 14 &&
+          item.y <= paddle.y + paddle.height + 14 &&
+          item.x >= paddle.x - 12 &&
+          item.x <= paddle.x + paddle.width + 12
+        ) {
+          switch (item.type) {
+            case 'score_plus_20':
+              score += 20;
+              addFloatingText('+20 ⭐', item.x, paddle.y - 15, '#FFE600');
+              playSound(750, 0.1, 'triangle');
+              break;
+            case 'score_plus_50':
+              score += 50;
+              addFloatingText('+50 💎', item.x, paddle.y - 15, '#00E5FF');
+              playSound(900, 0.15, 'triangle');
+              break;
+            case 'score_minus_30':
+              score = Math.max(0, score - 30);
+              addFloatingText('-30 💣', item.x, paddle.y - 15, '#FF3D00');
+              playSound(200, 0.2, 'sawtooth');
+              break;
+            case 'expand':
+              paddle.width = Math.min(paddle.maxWidth, paddle.width + 32);
+              addFloatingText('板子變長! ↔️', item.x, paddle.y - 15, '#FF6090');
+              playSound(650, 0.1);
+              break;
+            case 'shrink':
+              paddle.width = Math.max(paddle.minWidth, paddle.width - 25);
+              addFloatingText('板子變短! 🤏', item.x, paddle.y - 15, '#FF9100');
+              playSound(350, 0.1);
+              break;
+            case 'speed_up':
+              ball.speed = Math.min(MAX_SPEED, ball.speed + 85);
+              addFloatingText('球速加速! ⚡', item.x, paddle.y - 15, '#E040FB');
+              playSound(800, 0.1, 'square');
+              break;
+            case 'slow_down':
+              ball.speed = Math.max(250, ball.speed - 90);
+              addFloatingText('緩衝減速 🐢', item.x, paddle.y - 15, '#00E676');
+              playSound(400, 0.1, 'sine');
+              break;
+          }
+
+          saveBestScore(score);
+          updateScoreUI();
+          items.splice(i, 1);
+          continue;
+        }
+
+        // 超出畫面刪除
+        if (item.y > CANVAS_HEIGHT) {
+          items.splice(i, 1);
+        }
+      }
+
+      // 動態懸浮文字更新
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.dy * dt;
+        ft.alpha -= 1.1 * dt;
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+        }
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      // 夜間模式背景
+      if (isNightMode) {
+        ctx.fillStyle = '#18171A';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      }
+
+      // 邊框指示
+      if (isEndlessMode) {
+        ctx.strokeStyle = isNightMode ? '#FF4081' : '#F5C9D6';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(4, 4, CANVAS_WIDTH - 8, CANVAS_HEIGHT - 8);
+        
+        ctx.fillStyle = isNightMode ? '#FF4081' : '#F5C9D6';
+        ctx.fillRect(0, 0, CANVAS_WIDTH, 10);
+      } else {
+        ctx.strokeStyle = isNightMode ? '#333136' : '#F3ECE7';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(10, 10, CANVAS_WIDTH - 20, CANVAS_HEIGHT - 20);
+      }
+
+      // 磚塊渲染
+      if (!isEndlessMode) {
+        bricks.forEach((b) => {
+          if (!b.active) return;
+          ctx.fillStyle = b.color;
+          ctx.beginPath();
+          ctx.roundRect(b.x, b.y, b.width, b.height, 6);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.beginPath();
+          ctx.roundRect(b.x, b.y, b.width, b.height / 3, [6, 6, 0, 0]);
+          ctx.fill();
+        });
+      }
+
+      // 超清晰掉落道具渲染 (亮色背景底框 + 深色外框，極致顯眼)
+      items.forEach((item) => {
+        const r = 18;
+        ctx.save();
+        
+        // 圓形背景球體
+        ctx.beginPath();
+        ctx.arc(item.x, item.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = item.bg || '#FFFFFF';
+        ctx.fill();
+
+        // 鮮豔外框
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = item.color || '#242226';
+        ctx.stroke();
+
+        // Emoji 圖示
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.emoji, item.x, item.y + 1);
+        
+        ctx.restore();
+      });
+
+      // 擋板渲染
+      ctx.fillStyle = isNightMode ? '#F3ECE7' : '#242226';
+      ctx.beginPath();
+      ctx.roundRect(paddle.x, paddle.y, paddle.width, paddle.height, 6);
+      ctx.fill();
+
+      // Emoji 球體渲染
+      ctx.font = `${ball.radius * 2}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ball.emoji, ball.x, ball.y + 2);
+
+      // 顯眼放大懸浮動態文字繪製
+      floatingTexts.forEach((ft) => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, ft.alpha);
+        ctx.font = '900 20px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        
+        // 黑邊描邊 (Stroke)
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.lineWidth = 4;
+        ctx.strokeText(ft.text, ft.x, ft.y);
+
+        // 鮮豔填充文字 (Fill)
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      });
+    }
+
+    function gameLoop(time) {
+      if (gameState !== 'playing') return;
+
+      const dt = Math.min((time - lastTime) / 1000, 0.05);
+      lastTime = time;
+
+      updatePhysics(dt);
+      render();
+
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function handlePointerMove(e) {
+      if (gameState !== 'playing') return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = CANVAS_WIDTH / rect.width;
+      const clientX = e.clientX - rect.left;
+      const canvasX = clientX * scaleX;
+
+      paddle.x = Math.max(0, Math.min(CANVAS_WIDTH - paddle.width, canvasX - paddle.width / 2));
+    }
+
+    window.onload = function() {
+      loadBestScore();
+
+      const presetContainer = document.getElementById('presetContainer');
+      PRESET_EMOJIS.forEach((emoji) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-9 h-9 bg-[#FFFDF9] hover:bg-[#F5C9D6]/30 border border-[#EEE8E6] rounded-xl flex items-center justify-center text-lg transition-transform active:scale-95 select-none theme-transition';
+        btn.innerText = emoji;
+        btn.onclick = () => {
+          document.getElementById('emojiInput').value = emoji;
+          selectedEmoji = emoji;
+          document.getElementById('emojiPreview').innerText = emoji;
+        };
+        presetContainer.appendChild(btn);
+      });
+
+      const inputEl = document.getElementById('emojiInput');
+      inputEl.oninput = (e) => {
+        selectedEmoji = parseEmojiInput(e.target.value);
+        document.getElementById('emojiPreview').innerText = selectedEmoji;
+      };
+
+      document.getElementById('startBtn').onclick = startGame;
+      document.getElementById('playAgainBtn').onclick = startGame;
+      document.getElementById('changeEmojiBtn').onclick = () => {
+        gameState = 'ready';
+        applyTheme(false);
+        document.getElementById('gamePlayScreen').classList.add('hidden');
+        document.getElementById('readyScreen').classList.remove('hidden');
+      };
+
+      document.getElementById('soundToggleBtn').onclick = () => {
+        soundEnabled = !soundEnabled;
+        const icon = document.getElementById('soundIcon');
+        icon.className = soundEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      };
+
+      canvas.addEventListener('pointermove', handlePointerMove);
+      canvas.addEventListener('pointerdown', handlePointerMove);
+    };
+  </script>
+</body>
+</html>
